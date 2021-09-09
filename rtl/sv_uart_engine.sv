@@ -25,7 +25,7 @@
   #(
     . DATA_WIDTH    (DATA_WIDTH      ) 
   )
-  sv_uart_engine__
+  uart__
   (
     .iclk          (uart__iclk               ) ,
     .irst          (uart__irst               ) ,

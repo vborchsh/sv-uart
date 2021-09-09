@@ -83,7 +83,7 @@ module sv_uart_tx
   logic       [INT_WIDTH-1:0] freg     = '0;
   logic       [STOP_BITS-1:0] stopbits = '1;
 
-  enum logic [2:0] {
+  enum logic [1:0] {
     ST_WAIT = 2'd0,
     ST_SOP  = 2'd1,
     ST_DAT  = 2'd2,
