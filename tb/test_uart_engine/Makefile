@@ -1,5 +1,5 @@
 TOPLEVEL_LANG ?= verilog
-SIM ?= questa
+SIM ?= modelsim
 WAVES ?= 0
 GUI ?= 0
 
@@ -11,9 +11,9 @@ PWD=$(shell pwd)
 DUT              = sv_uart_engine
 TOPLEVEL         = $(DUT)
 MODULE           = test_$(DUT)
-VERILOG_SOURCES += $(PWD)/../../sv-uart/$(DUT).sv
-VERILOG_SOURCES += $(PWD)/../../sv-uart/sv_uart_rx.sv
-VERILOG_SOURCES += $(PWD)/../../sv-uart/sv_uart_tx.sv
+VERILOG_SOURCES += $(PWD)/../../rtl/$(DUT).sv
+VERILOG_SOURCES += $(PWD)/../../rtl/sv_uart_rx.sv
+VERILOG_SOURCES += $(PWD)/../../rtl/sv_uart_tx.sv
 
 # module's parameters
 export PARAM_DATA_WIDTH ?= 24
