@@ -98,6 +98,7 @@ module sv_uart_engine
   logic [WORD_WIDTH-1:0] tx__s_axis_tdata  ;
   logic                  tx__s_axis_tvalid ;
   logic                  tx__s_axis_tready ;
+  logic                  tx__s_axis_tuser  ;
   logic           [15:0] tx__idivider      ;
   logic                  tx__otx           ;
 
@@ -114,6 +115,7 @@ module sv_uart_engine
   //--------------------------------------------------------------------------------------------------
 
   logic                          tx_busy = '0;
+  logic                          tx_flag = '0;
   logic                          tvalid  = '0;
   logic         [DATA_WIDTH-1:0] tx_dat  = '0;
   logic [$clog2(DATA_WIDTH)-1:0] cnt_tx  = '0;
@@ -123,15 +125,18 @@ module sv_uart_engine
   //--------------------------------------------------------------------------------------------------
 
   always_ff@(posedge iclk) begin
-    if (cnt_tx == WORDS_NUM-1 && tx__s_axis_tready)             tx_busy <= 1'b0;
-    else if (s_axis_tvalid)              tx_busy <= 1'b1;
+    if (cnt_tx == WORDS_NUM-1 && tx__s_axis_tready)  tx_busy <= 1'b0;
+    else if (s_axis_tvalid)                          tx_busy <= 1'b1;
     tvalid <= tx_busy && ~tx__s_axis_tready;
 
-    if (~tx_busy)                        cnt_tx <= '0;
-    else if (tx__s_axis_tready)          cnt_tx <= cnt_tx + 1'b1;
+    if (s_axis_tvalid)                               tx_flag <= 1'b1;
+    else if (tx__s_axis_tuser)                       tx_flag <= tx_busy;
 
-    if (s_axis_tvalid && s_axis_tready)  tx_dat <= s_axis_tdata;
-    else if (tx__s_axis_tready)          tx_dat <= tx_dat << 8 | 'h00;
+    if (~tx_busy)                                    cnt_tx <= '0;
+    else if (tx__s_axis_tready)                      cnt_tx <= cnt_tx + 1'b1;
+
+    if (s_axis_tvalid && s_axis_tready)              tx_dat <= s_axis_tdata;
+    else if (tx__s_axis_tready)                      tx_dat <= tx_dat << 8 | 'h00;
   end
 
   //--------------------------------------------------------------------------------------------------
@@ -140,7 +145,7 @@ module sv_uart_engine
 
   assign m_axis_tdata = rx__m_axis_tdata;
   assign m_axis_tvalid = rx__m_axis_tvalid;
-  assign s_axis_tready = ~tx_busy;
+  assign s_axis_tready = ~tx_flag;
 
   always_ff@(posedge iclk) begin
     otx <= tx__otx;
@@ -190,6 +195,7 @@ module sv_uart_engine
     .s_axis_tdata   (tx__s_axis_tdata       ) ,
     .s_axis_tvalid  (tx__s_axis_tvalid      ) ,
     .s_axis_tready  (tx__s_axis_tready      ) ,
+    .s_axis_tuser   (tx__s_axis_tuser       ) ,
     .idivider       (tx__idivider           ) ,
     .otx            (tx__otx                ) 
   );
