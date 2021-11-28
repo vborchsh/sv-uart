@@ -71,6 +71,7 @@ module sv_uart_rx
   //
   //--------------------------------------------------------------------------------------------------
 
+  logic               [2:0] metastab = '0;
   logic       [IN_PIPE-1:0] frx      = '0;
   logic                     true_rx  = '0;
   logic                     dtrue_rx = '0;
@@ -88,10 +89,11 @@ module sv_uart_rx
 
   // Metastable & CDC pipe
   always_ff@(posedge iclk) begin
-    frx <= frx << 1 | irx;
+    metastab <= metastab << 1 | irx;
+    frx <= frx << 1 | metastab[2];
 
-    if (&frx)  true_rx <= 1'b1;
-    else       true_rx <= 1'b0;
+    if (&frx)             true_rx <= 1'b1;
+    else if (frx == 'd0)  true_rx <= 1'b0;
 
     dtrue_rx <= true_rx;
   end

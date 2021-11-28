@@ -63,7 +63,8 @@
 
 module sv_uart_engine
 #(
-  parameter int DATA_WIDTH = 24 // Must be divided by 8; >8
+  parameter int DATA_WIDTH = 24 , // Must be divided by 8; >8
+  parameter int RX_PIPE = 5 // debounce and metastability pipe
 )
 (
   input  logic                  iclk          ,
@@ -84,7 +85,6 @@ module sv_uart_engine
   //--------------------------------------------------------------------------------------------------
 
   localparam int WORD_WIDTH = 8;
-  localparam int IN_PIPE    = 5;
   localparam int STOP_BITS  = 1;
 
   localparam int WORDS_NUM  = DATA_WIDTH/WORD_WIDTH;
@@ -170,7 +170,7 @@ module sv_uart_engine
   sv_uart_rx
   #(
     . DATA_WIDTH    (WORD_WIDTH              ) ,
-    . IN_PIPE       (IN_PIPE                 ) 
+    . IN_PIPE       (RX_PIPE                 ) 
   )
   rx__
   (
