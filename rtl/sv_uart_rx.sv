@@ -110,12 +110,13 @@ module sv_uart_rx
 
     if (irst)          cnt <= '0;
     else if (clk_ena)  cnt <= '0;
-      else if (ena)    cnt <= cnt + 1'b1;
+      else if (~ena)   cnt <= '0;
+        else if (ena)  cnt <= cnt + 1'b1;
     // First clock with shift by T/2 for good signal phase
     if (cnt_pack == 0)
-      clk_ena <= (cnt == (idivider >> 2)-2);
+      clk_ena <= (cnt == (idivider >> 2)-2) && ena;
     else
-      clk_ena <= (cnt == idivider-2);
+      clk_ena <= (cnt == idivider-2) && ena;
 
     if (irst)                  cnt_pack <= '0;
     else if (~ena)             cnt_pack <= '0;
