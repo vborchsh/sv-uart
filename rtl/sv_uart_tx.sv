@@ -128,12 +128,13 @@ module sv_uart_tx
   //
   //--------------------------------------------------------------------------------------------------
 
-  always_ff@(posedge iclk) begin
-    if (irst)                s_axis_tready <= '0;
-    else if (s_axis_tvalid)  s_axis_tready <= (ST == ST_WAIT);
+  assign s_axis_tready = (ST == ST_WAIT);
 
-    if ((cnt > INT_WIDTH-2) || (ST == ST_WAIT))  otx <= 1'b1;
-    else if (clk_ena)                            otx <= freg[$low(freg)];
+  always_ff@(posedge iclk) begin
+    if ((cnt > INT_WIDTH-2) || (ST == ST_WAIT))
+      otx <= 1'b1;
+    else if (clk_ena)
+      otx <= freg[$low(freg)];
 
     s_axis_tuser <= (ST == ST_EOP) && clk_ena;
   end
