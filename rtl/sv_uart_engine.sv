@@ -127,10 +127,10 @@ module sv_uart_engine
   always_ff@(posedge iclk) begin
     if (irst)
       tx_busy <= 1'b0;
-    if (cnt_tx == WORDS_NUM-1 && tx__s_axis_tready)
-      tx_busy <= 1'b0;
     else if (s_axis_tvalid && s_axis_tready)
       tx_busy <= 1'b1;
+    else if (cnt_tx == WORDS_NUM-1 && tx__s_axis_tready)
+      tx_busy <= 1'b0;
 
     tvalid <= tx_busy && tx__s_axis_tready;
 
