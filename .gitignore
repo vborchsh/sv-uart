@@ -1,4 +1,8 @@
 tb/**/work
-tb/**/modelsim.ini
+tb/**/*.wlf
 tb/**/sim_build
-tb/**/transcript
+tb/**/*.fst*
+tb/**/*.xml
+tb/**/iverilog_dump.v
+modelsim.ini
+__pycache__
