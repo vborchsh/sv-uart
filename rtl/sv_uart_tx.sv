@@ -29,7 +29,6 @@
     .s_axis_tdata  (tx__s_axis_tdata       ) ,
     .s_axis_tvalid (tx__s_axis_tvalid      ) ,
     .s_axis_tready (tx__s_axis_tready      ) ,
-    .s_axis_tuser  (tx__s_axis_tuser       ) ,
     .idivider      (tx__idivider           ) ,
     .otx           (tx__otx                ) 
   );
@@ -64,7 +63,6 @@ module sv_uart_tx
   input  logic [DATA_WIDTH-1:0] s_axis_tdata  ,
   input  logic                  s_axis_tvalid ,
   output logic                  s_axis_tready ,
-  output logic                  s_axis_tuser  ,
   input  logic           [15:0] idivider      ,
   output logic                  otx           
 );
@@ -135,8 +133,6 @@ module sv_uart_tx
       otx <= 1'b1;
     else if (clk_ena)
       otx <= freg[$low(freg)];
-
-    s_axis_tuser <= (ST == ST_EOP) && clk_ena;
   end
 
 endmodule

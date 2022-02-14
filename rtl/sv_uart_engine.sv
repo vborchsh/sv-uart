@@ -98,7 +98,6 @@ module sv_uart_engine
   logic [WORD_WIDTH-1:0] tx__s_axis_tdata  ;
   logic                  tx__s_axis_tvalid ;
   logic                  tx__s_axis_tready ;
-  logic                  tx__s_axis_tuser  ;
   logic           [15:0] tx__idivider      ;
   logic                  tx__otx           ;
 
@@ -207,7 +206,6 @@ module sv_uart_engine
     .s_axis_tdata   (tx__s_axis_tdata       ) ,
     .s_axis_tvalid  (tx__s_axis_tvalid      ) ,
     .s_axis_tready  (tx__s_axis_tready      ) ,
-    .s_axis_tuser   (tx__s_axis_tuser       ) ,
     .idivider       (tx__idivider           ) ,
     .otx            (tx__otx                ) 
   );

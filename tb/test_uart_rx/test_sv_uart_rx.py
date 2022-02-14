@@ -34,10 +34,7 @@ class TB(object):
         dut.idivider.setimmediatevalue(int(1e9/baud/8))
 
     async def reset(self):
-        self.dut.irst.setimmediatevalue(0)
-        await RisingEdge(self.dut.iclk)
-        await RisingEdge(self.dut.iclk)
-        self.dut.irst <= 1
+        self.dut.irst.setimmediatevalue(1)
         await RisingEdge(self.dut.iclk)
         await RisingEdge(self.dut.iclk)
         self.dut.irst <= 0
