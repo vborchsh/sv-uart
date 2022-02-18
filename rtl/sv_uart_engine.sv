@@ -145,7 +145,7 @@ module sv_uart_engine
     if (s_axis_tvalid && s_axis_tready)
       tx_dat <= s_axis_tdata;
     else if (tx__s_axis_tready && tx__s_axis_tvalid)
-      tx_dat <= tx_dat << 8 | 'h00;
+      tx_dat <= tx_dat << 8 | 8'h00;
   end
 
   assign val_data = tvalid && tx__s_axis_tready;
