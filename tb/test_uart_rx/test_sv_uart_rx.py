@@ -37,7 +37,7 @@ class TB(object):
         self.dut.irst.setimmediatevalue(1)
         await RisingEdge(self.dut.iclk)
         await RisingEdge(self.dut.iclk)
-        self.dut.irst <= 0
+        self.dut.irst.value = 0
         await RisingEdge(self.dut.iclk)
         await RisingEdge(self.dut.iclk)
 
@@ -61,7 +61,7 @@ async def run_test(dut, payload_lengths=None, payload_data=None):
         assert tb.sink.empty()
         assert rx_data == test_data
 
-        await Timer(1, 'us')
+        await Timer(100, 'ns')
 
     await RisingEdge(dut.iclk)
     await RisingEdge(dut.iclk)
@@ -99,7 +99,7 @@ def incrementing_payload(length):
 #
 #----------------------------------------------------------------------------------
 def size_list():
-    return list(range(1, 16)) + [32, 64, 128]
+    return list(range(1, 16)) + [32, 512]
 
 
 #----------------------------------------------------------------------------------
