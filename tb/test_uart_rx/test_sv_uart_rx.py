@@ -49,6 +49,9 @@ async def run_test(dut, payload_lengths=None, payload_data=None):
     tb = TB(dut)
     await tb.reset()
 
+    # Wait 200 ns for initialize metastability and CDC pipes
+    await Timer(200, 'ns')
+
     for test_data in [payload_data(x) for x in payload_lengths()]:
         await tb.source.write(test_data)
 
@@ -56,7 +59,7 @@ async def run_test(dut, payload_lengths=None, payload_data=None):
         while len(rx_data) < len(test_data):
             rx_data.extend(await tb.sink.read())
 
-        tb.log.info("Readed data: %s", rx_data)
+        # tb.log.info("Readed data: %s", rx_data)
 
         assert tb.sink.empty()
         assert rx_data == test_data
