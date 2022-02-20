@@ -137,7 +137,7 @@ def size_list():
 #----------------------------------------------------------------------------------
 # cocotb-test
 if cocotb.SIM_NAME:
-    for test in [run_test_rx, run_test_rx]:
+    for test in [run_test_tx, run_test_rx]:
         factory = TestFactory(test)
         factory.add_option("payload_lengths", [size_list])
         factory.add_option("payload_data", [incrementing_payload, prbs_payload])
