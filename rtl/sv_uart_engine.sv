@@ -113,11 +113,10 @@ module sv_uart_engine
   //
   //--------------------------------------------------------------------------------------------------
 
-  logic                          tx_busy;
+  logic          [WORDS_NUM-1:0] tx_busy;
   logic                          tvalid;
   logic                          val_data;
   logic         [DATA_WIDTH-1:0] tx_dat;
-  logic [$clog2(DATA_WIDTH)-1:0] cnt_tx;
 
   //--------------------------------------------------------------------------------------------------
   //
@@ -127,18 +126,16 @@ module sv_uart_engine
     if (irst)
       tx_busy <= 1'b0;
     else if (s_axis_tvalid && s_axis_tready)
-      tx_busy <= 1'b1;
-    else if (cnt_tx == WORDS_NUM-1 && tx__s_axis_tready)
-      tx_busy <= 1'b0;
-
-    tvalid <= tx_busy && tx__s_axis_tready;
+      tx_busy <= '1;
+    else if (val_data && tx__s_axis_tready)
+      tx_busy <= tx_busy << 1 | 1'b0;
 
     if (irst)
-      cnt_tx <= '0;
-    if (~tx_busy)
-      cnt_tx <= '0;
-    else if (val_data)
-      cnt_tx <= cnt_tx + 1'b1;
+      tvalid <= 1'b0;
+    else if (tx_busy != 'd0)
+      tvalid <= 1'b1;
+    else if (tx__s_axis_tready)
+      tvalid <= 1'b0;
 
     if (irst)
       tx_dat <= '0;
@@ -148,7 +145,7 @@ module sv_uart_engine
       tx_dat <= tx_dat << 8 | 8'h00;
   end
 
-  assign val_data = tvalid && tx__s_axis_tready;
+  assign val_data = tvalid && (tx_busy != 'd0);
 
   //--------------------------------------------------------------------------------------------------
   //
@@ -156,7 +153,7 @@ module sv_uart_engine
 
   assign m_axis_tdata = rx__m_axis_tdata;
   assign m_axis_tvalid = rx__m_axis_tvalid;
-  assign s_axis_tready = ~tx_busy;
+  assign s_axis_tready = ~tvalid;
 
   always_ff@(posedge iclk) begin
     otx <= tx__otx;
@@ -175,7 +172,7 @@ module sv_uart_engine
   assign tx__iclk          = iclk;
   assign tx__irst          = irst;
   assign tx__s_axis_tdata  = tx_dat[$high(tx_dat):$high(tx_dat)-7];
-  assign tx__s_axis_tvalid = tvalid && tx__s_axis_tready;
+  assign tx__s_axis_tvalid = val_data;
   assign tx__idivider      = idivider;
 
   sv_uart_rx
