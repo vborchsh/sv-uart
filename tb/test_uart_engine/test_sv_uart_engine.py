@@ -59,14 +59,12 @@ async def run_test_tx(dut, payload_lengths=None, payload_data=None):
         while len(rx_data) < int(3 * len(test_data)):
             rx_data.extend(await tb.uart_sink.read())
 
-        tb.log.info("Readed data: %s", rx_data)
         rx_data = rx_data[2::3]
-        tb.log.info("Parsed data: %s", rx_data)
 
         assert tb.uart_sink.empty()
         assert rx_data == test_data
 
-        await Timer(100, 'ns')
+        await Timer(10, 'us')
 
     await RisingEdge(dut.iclk)
     await RisingEdge(dut.iclk)

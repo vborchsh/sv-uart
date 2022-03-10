@@ -114,7 +114,7 @@ module sv_uart_engine
   //--------------------------------------------------------------------------------------------------
 
   logic          [WORDS_NUM-1:0] tx_busy;
-  logic                          tvalid;
+  logic                          busy;
   logic                          val_data;
   logic         [DATA_WIDTH-1:0] tx_dat;
 
@@ -127,25 +127,25 @@ module sv_uart_engine
       tx_busy <= 1'b0;
     else if (s_axis_tvalid && s_axis_tready)
       tx_busy <= '1;
-    else if (val_data && tx__s_axis_tready)
+    else if (tx__s_axis_tvalid && tx__s_axis_tready)
       tx_busy <= tx_busy << 1 | 1'b0;
 
     if (irst)
-      tvalid <= 1'b0;
-    else if (tx_busy != 'd0)
-      tvalid <= 1'b1;
-    else if (tx__s_axis_tready)
-      tvalid <= 1'b0;
+      busy <= 1'b0;
+    else if (s_axis_tvalid && ~busy)
+      busy <= 1'b1;
+    else if (tx_busy == 'd0)
+      busy <= 1'b0;
 
     if (irst)
       tx_dat <= '0;
     if (s_axis_tvalid && s_axis_tready)
       tx_dat <= s_axis_tdata;
-    else if (tx__s_axis_tready && tx__s_axis_tvalid)
+    else if (busy && (tx_busy != 'd0) && tx__s_axis_tready)
       tx_dat <= tx_dat << 8 | 8'h00;
-  end
 
-  assign val_data = tvalid && (tx_busy != 'd0);
+    val_data <= busy && (tx_busy != 'd0);
+  end
 
   //--------------------------------------------------------------------------------------------------
   //
@@ -153,7 +153,7 @@ module sv_uart_engine
 
   assign m_axis_tdata = rx__m_axis_tdata;
   assign m_axis_tvalid = rx__m_axis_tvalid;
-  assign s_axis_tready = ~tvalid;
+  assign s_axis_tready = ~busy;
 
   always_ff@(posedge iclk) begin
     otx <= tx__otx;
