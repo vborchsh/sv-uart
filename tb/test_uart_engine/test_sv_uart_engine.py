@@ -53,16 +53,34 @@ async def run_test_tx(dut, payload_lengths=None, payload_data=None):
     await tb.reset()
 
     for test_data in [payload_data(x) for x in payload_lengths()]:
-        await tb.axi_source.write(test_data)
+        # Mix from one-bytes to 3-bytes words
+        tx_test_data = []
+        for word in test_data:
+            full_word  = word
+            full_word |= (word-2) << 8
+            full_word |= (word-1) << 16
+            full_word &= 0xFFFFFF
+            tx_test_data.append(full_word)
+        await tb.axi_source.write(tx_test_data)
 
+        # Transmit and read data back
+        rx_test_data = []
         rx_data = bytearray()
-        while len(rx_data) < int(3 * len(test_data)):
+        while len(rx_data) < 3*int(len(test_data)):
             rx_data.extend(await tb.uart_sink.read())
 
-        rx_data = rx_data[2::3]
+        # Build integers
+        for i in range(0, len(rx_data)-2, 3):
+            full_word  = rx_data[i+2]
+            full_word |= rx_data[i+1] << 8
+            full_word |= rx_data[i]   << 16
+            rx_test_data.append(full_word)
+
+        # tb.log.info("TX: %s" % tx_test_data)
+        # tb.log.info("RX: %s" % rx_test_data)
 
         assert tb.uart_sink.empty()
-        assert rx_data == test_data
+        assert tx_test_data == rx_test_data
 
         await Timer(10, 'us')
 
@@ -84,7 +102,7 @@ async def run_test_rx(dut, payload_lengths=None, payload_data=None):
         while len(rx_data) < len(test_data):
             rx_data.extend(await tb.axi_sink.read())
 
-        tb.log.info("Readed data: %s", rx_data)
+        # tb.log.info("Readed data: %s", rx_data)
 
         assert tb.axi_sink.empty()
         assert rx_data == test_data
@@ -127,7 +145,7 @@ def incrementing_payload(length):
 #
 #----------------------------------------------------------------------------------
 def size_list():
-    return list(range(1, 16)) + [32, 512]
+    return list(range(1, 16)) + [32, 256]
 
 
 #----------------------------------------------------------------------------------
