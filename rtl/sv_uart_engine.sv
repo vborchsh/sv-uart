@@ -141,7 +141,7 @@ module sv_uart_engine
       tx_dat <= '0;
     if (s_axis_tvalid && s_axis_tready)
       tx_dat <= s_axis_tdata;
-    else if (busy && (tx_busy != 'd0) && tx__s_axis_tready)
+    else if (busy && (tx_busy != 'd0) && tx__s_axis_tready && tx__s_axis_tvalid)
       tx_dat <= tx_dat << 8 | 8'h00;
 
     val_data <= busy && (tx_busy != 'd0);
