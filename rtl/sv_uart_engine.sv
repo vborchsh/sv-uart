@@ -134,7 +134,7 @@ module sv_uart_engine
       busy <= 1'b0;
     else if (s_axis_tvalid && ~busy)
       busy <= 1'b1;
-    else if (tx_busy == 'd0)
+    else if ((tx_busy == 'd0) && tx__s_axis_tready)
       busy <= 1'b0;
 
     if (irst)
