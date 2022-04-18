@@ -136,7 +136,10 @@ module sv_uart_rx
 
   always_ff@(posedge iclk) begin
     m_axis_tvalid <= eop && m_axis_tready;
-    if (m_axis_tready && eop)
+
+    if (irst)
+      m_axis_tdata <= '0;
+    else if (m_axis_tready && eop)
       m_axis_tdata <= freg;
   end
 
