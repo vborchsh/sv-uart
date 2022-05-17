@@ -1,5 +1,11 @@
+
 /*
+
+
+
   parameter int DATA_WIDTH = 24;
+
+
 
   logic                  uart__iclk          ;
   logic                  uart__irst          ;
@@ -13,24 +19,27 @@
   logic                  uart__otx           ;
   logic                  uart__irx           ;
 
+
+
   sv_uart_engine
   #(
-    . DATA_WIDTH   (DATA_WIDTH           ) 
+    . DATA_WIDTH    (DATA_WIDTH      ) 
   )
-  uart
+  uart__
   (
-    .iclk          (uart__iclk           ) ,
-    .irst          (uart__irst           ) ,
-    .m_axis_tdata  (uart__m_axis_tdata   ) ,
-    .m_axis_tvalid (uart__m_axis_tvalid  ) ,
-    .m_axis_tready (uart__m_axis_tready  ) ,
-    .s_axis_tdata  (uart__s_axis_tdata   ) ,
-    .s_axis_tvalid (uart__s_axis_tvalid  ) ,
-    .s_axis_tready (uart__s_axis_tready  ) ,
-    .idivider      (uart__idivider       ) ,
-    .otx           (uart__otx            ) ,
-    .irx           (uart__irx            ) 
+    .iclk          (uart__iclk               ) ,
+    .irst          (uart__irst               ) ,
+    .m_axis_tdata  (uart__m_axis_tdata       ) ,
+    .m_axis_tvalid (uart__m_axis_tvalid      ) ,
+    .m_axis_tready (uart__m_axis_tready      ) ,
+    .s_axis_tdata  (uart__s_axis_tdata       ) ,
+    .s_axis_tvalid (uart__s_axis_tvalid      ) ,
+    .s_axis_tready (uart__s_axis_tready      ) ,
+    .idivider      (uart__idivider           ) ,
+    .otx           (uart__otx                ) ,
+    .irx           (uart__irx                ) 
   );
+
 
   assign uart__iclk          = '0;
   assign uart__irst          = '0;
@@ -39,49 +48,61 @@
   assign uart__s_axis_tvalid = '0;
   assign uart__idivider      = '0;
   assign uart__irx           = '0;
+
+
+
 */ 
 
 //
 // Project       : UART core
-// Author        : Vladislav Borshch
+// Author        : Borshch Vladislav
 // Contacts      : borchsh.vn@gmail.com
 // Workfile      : sv_uart_engine.sv
-// Description   : AXIStream UART engine module
+// Description   : AXIstream UART engine module
 //
 
 module sv_uart_engine
 #(
   parameter int DATA_WIDTH = 24 , // Must be divided by 8; >8
-  parameter int RX_PIPE = 5       // debounce pipe
+  parameter int RX_PIPE = 5 // debounce and metastability pipe
 )
 (
   input  logic                  iclk          ,
   input  logic                  irst          ,
-  output logic [DATA_WIDTH-1:0] m_axis_tdata  , // rx datapath
+  output logic [DATA_WIDTH-1:0] m_axis_tdata  ,
   output logic                  m_axis_tvalid ,
   input  logic                  m_axis_tready ,
-  input  logic [DATA_WIDTH-1:0] s_axis_tdata  , // tx datapath
+  input  logic [DATA_WIDTH-1:0] s_axis_tdata  ,
   input  logic                  s_axis_tvalid ,
   output logic                  s_axis_tready ,
-  input  logic           [15:0] idivider      , // baudrate divider. baudrate = iclk/idivider
-  output logic                  otx           , // UART tx
-  input  logic                  irx             // UART rx
+  input  logic           [15:0] idivider      ,
+  output logic                  otx           ,
+  input  logic                  irx           
 );
+
+  //--------------------------------------------------------------------------------------------------
+  //
+  //--------------------------------------------------------------------------------------------------
 
   localparam int WORD_WIDTH = 8;
   localparam int STOP_BITS  = 1;
+
   localparam int WORDS_NUM  = DATA_WIDTH/WORD_WIDTH;
 
   //--------------------------------------------------------------------------------------------------
   //
   //--------------------------------------------------------------------------------------------------
 
+  logic                  tx__iclk          ;
+  logic                  tx__irst          ;
   logic [WORD_WIDTH-1:0] tx__s_axis_tdata  ;
   logic                  tx__s_axis_tvalid ;
   logic                  tx__s_axis_tready ;
   logic           [15:0] tx__idivider      ;
   logic                  tx__otx           ;
 
+  logic                  rx__iclk          ;
+  logic                  rx__irst          ;
   logic [WORD_WIDTH-1:0] rx__m_axis_tdata  ;
   logic                  rx__m_axis_tvalid ;
   logic                  rx__m_axis_tready ;
@@ -92,16 +113,15 @@ module sv_uart_engine
   //
   //--------------------------------------------------------------------------------------------------
 
-  logic    [WORDS_NUM-1:0] tx_busy;
-  logic                    busy;
-  logic                    val_data;
-  logic   [DATA_WIDTH-1:0] tx_dat;
+  logic          [WORDS_NUM-1:0] tx_busy;
+  logic                          busy;
+  logic                          val_data;
+  logic         [DATA_WIDTH-1:0] tx_dat;
 
   //--------------------------------------------------------------------------------------------------
   //
   //--------------------------------------------------------------------------------------------------
 
-  // Some tricky flags for send to UART full width of input data bus
   always_ff@(posedge iclk) begin
     if (irst)
       tx_busy <= 1'b0;
@@ -143,23 +163,27 @@ module sv_uart_engine
   //
   //--------------------------------------------------------------------------------------------------
 
+  assign rx__iclk          = iclk;
+  assign rx__irst          = irst;
   assign rx__m_axis_tready = m_axis_tready;
   assign rx__idivider      = idivider;
   assign rx__irx           = irx;
 
+  assign tx__iclk          = iclk;
+  assign tx__irst          = irst;
   assign tx__s_axis_tdata  = tx_dat[$high(tx_dat):$high(tx_dat)-7];
   assign tx__s_axis_tvalid = val_data;
   assign tx__idivider      = idivider;
 
   sv_uart_rx
   #(
-    . DATA_WIDTH    (WORD_WIDTH             ) ,
-    . IN_PIPE       (RX_PIPE                ) 
+    . DATA_WIDTH    (WORD_WIDTH              ) ,
+    . IN_PIPE       (RX_PIPE                 ) 
   )
   rx__
   (
-    .iclk           (iclk                   ) ,
-    .irst           (irst                   ) ,
+    .iclk           (rx__iclk               ) ,
+    .irst           (rx__irst               ) ,
     .m_axis_tdata   (rx__m_axis_tdata       ) ,
     .m_axis_tvalid  (rx__m_axis_tvalid      ) ,
     .m_axis_tready  (rx__m_axis_tready      ) ,
@@ -174,8 +198,8 @@ module sv_uart_engine
   )
   tx__
   (
-    .iclk           (iclk                   ) ,
-    .irst           (irst                   ) ,
+    .iclk           (tx__iclk               ) ,
+    .irst           (tx__irst               ) ,
     .s_axis_tdata   (tx__s_axis_tdata       ) ,
     .s_axis_tvalid  (tx__s_axis_tvalid      ) ,
     .s_axis_tready  (tx__s_axis_tready      ) ,

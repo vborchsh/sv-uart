@@ -1,6 +1,11 @@
 /*
+
+
+
   parameter int DATA_WIDTH = 8;
   parameter int IN_PIPE    = 5;
+
+
 
   logic                  rx__iclk          ;
   logic                  rx__irst          ;
@@ -10,41 +15,47 @@
   logic           [15:0] rx__idivider      ;
   logic                  rx__irx           ;
 
+
+
   sv_uart_rx
   #(
-    . DATA_WIDTH    (DATA_WIDTH        ) ,
-    . IN_PIPE       (IN_PIPE           ) 
+    . DATA_WIDTH    (DATA_WIDTH      ) ,
+    . IN_PIPE       (IN_PIPE         ) 
   )
-  rx
+  rx__
   (
-    .iclk          (rx__iclk           ) ,
-    .irst          (rx__irst           ) ,
-    .m_axis_tdata  (rx__m_axis_tdata   ) ,
-    .m_axis_tvalid (rx__m_axis_tvalid  ) ,
-    .m_axis_tready (rx__m_axis_tready  ) ,
-    .idivider      (rx__idivider       ) ,
-    .irx           (rx__irx            ) 
+    .iclk          (rx__iclk               ) ,
+    .irst          (rx__irst               ) ,
+    .m_axis_tdata  (rx__m_axis_tdata       ) ,
+    .m_axis_tvalid (rx__m_axis_tvalid      ) ,
+    .m_axis_tready (rx__m_axis_tready      ) ,
+    .idivider      (rx__idivider           ) ,
+    .irx           (rx__irx                ) 
   );
+
 
   assign rx__iclk          = '0;
   assign rx__irst          = '0;
   assign rx__m_axis_tready = '0;
   assign rx__idivider      = '0;
   assign rx__irx           = '0;
+
+
+
 */ 
 
 //
 // Project       : UART core
-// Author        : Vladislav Borshch
+// Author        : Borshch Vladislav
 // Contacts      : borchsh.vn@gmail.com
 // Workfile      : sv_uart_rx.sv
-// Description   : AXIStream UART receiver
+// Description   : AXIstream UART receiver
 //
 
 module sv_uart_rx
 #(
   parameter int DATA_WIDTH = 8 ,
-  parameter int IN_PIPE = 5 
+  parameter int IN_PIPE    = 5 
 )
 (
   input  logic                  iclk          ,
@@ -116,8 +127,7 @@ module sv_uart_rx
 
   // Data collect
   always_ff@(posedge iclk) begin
-    if (clk_ena)
-      freg <= {true_rx, freg[7:1]};
+    if (clk_ena)  freg <= {true_rx, freg[7:1]};
   end
 
   //--------------------------------------------------------------------------------------------------
