@@ -8,17 +8,14 @@ simulate:
         # Update current system
         - apt -y update && apt -y upgrade
 
-        # Install latest version of Icarus Verilog
-        - apt -y install autoconf gperf flex bison build-essential
-        - git clone https://github.com/steveicarus/iverilog.git
-        - cd iverilog
-        - git checkout --track -b v11-branch origin/v11-branch
-        - git pull
-        - sh autoconf.sh
-        - ./configure
-        - make
-        - make install
-        - cd ./../
+        # Install latest version of ModelSim
+        - sudo dpkg --add-architecture i386
+        - sudo apt update
+        - sudo apt install -y libc6:i386 libxtst6:i386 libncurses5:i386 libxft2:i386 libstdc++6:i386 libc6-dev-i386 lib32z1 libqt5xml5 liblzma-dev
+        - wget https://download.altera.com/akdlm/software/acdsinst/20.1std/711/ib_installers/ModelSimSetup-20.1.0.711-linux.run
+        - chmod +x ModelSimSetup-20.1.0.711-linux.run
+        - ./ModelSimSetup-20.1.0.711-linux.run --mode unattended --accept_eula 1 --installdir $HOME/ModelSim-20.1.0 --unattendedmodeui none
+        - export PATH="$HOME/ModelSim-20.1.0/modelsim_ase/bin:$PATH"
 
         # Install cocotb stuff
         - apt -y install python3 python3-pip
@@ -26,4 +23,4 @@ simulate:
 
         # Run simulation
         - cd ./tb
-        - make WAVES=1
+        - make
