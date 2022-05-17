@@ -19,7 +19,7 @@ simulate:
         - export PATH="$HOME/ModelSim-20.1.0/modelsim_ase/bin:$PATH"
 
         # Install cocotb stuff
-        - apt -y install python3 python3-pip
+        - apt -y install python3:i386 python3-pip
         - pip3 install cocotb cocotbext-axi cocotbext-uart cocotb-test
 
         # Run simulation
